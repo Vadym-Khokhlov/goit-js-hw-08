@@ -1,37 +1,34 @@
-import throttle from "lodash.throttle";
-import storageFunctions from "./storage";
+import throttle from 'lodash.throttle';
 
 const refs = {
-  form: document.querySelector(".feedback-form"),
-  input: document.querySelector("input"),
+  form: document.querySelector('.feedback-form'),
+  email: document.querySelector('input'),
+  feedback: document.querySelector('textarea'),
 };
-const LOCAL_STORAGE_KEY = "feedback-form-state";
-const dataInput = {
-  email: refs.form.elements.email.value,
-  message: refs.form.elements.message.value,
-};
+const LOCAL_STORAGE_KEY = 'feedback-form-state';
 
-refs.form.addEventListener("input", throttle(onFormInput, 500)); // need throttle 500ms
-refs.form.addEventListener("submit", onFormSubmit);
+dataLoader();
+refs.form.addEventListener('input', throttle(dataSaver, 500)); // need throttle 500ms
+refs.form.addEventListener('submit', formSubmitter);
 
-function onFormInput(e) {
-  if (storageFunctions.load(LOCAL_STORAGE_KEY) === null) return;
-  const message = e.target.value;
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(message));
+function dataSaver() {
+  const dataInput = {
+    email: refs.form.elements.email.value,
+    message: refs.form.elements.message.value,
+  };
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataInput));
 }
 
-// function inputDataChecker() {
-//   const savedData = localStorage.getItem("dataInput");
-//   if (savedData) {
-//     console.log(savedData);
-//   }
-// }
+function dataLoader() {
+  const dataLoad = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+  refs.email.value = dataLoad?.email || '';
+  refs.feedback.value = dataLoad?.message || '';
+}
 
-function onFormSubmit(e) {
+function formSubmitter(e) {
   e.preventDefault();
-  dataInput[e.currentTarget.name] = e.currentTarget.value;
-
-  console.log(dataInput);
-  e.currentTarget.reset();
-  storageFunctions.remove(LOCAL_STORAGE_KEY);
+  const dataLoad = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+  console.log(dataLoad);
+  refs.form.reset();
+  localStorage.removeItem(LOCAL_STORAGE_KEY);
 }
